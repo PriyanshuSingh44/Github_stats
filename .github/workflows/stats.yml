@@ -14,18 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate stats
-        uses: anuraghazra/github-readme-stats@master
-        with:
-          username: PriyanshuSingh44
-          show_icons: true
-          theme: radical
-          output: stats.svg
+      - name: Download GitHub stats
+        run: |
+          curl -o stats.svg "https://github-readme-stats.vercel.app/api?username=PriyanshuSingh44&show_icons=true&theme=radical"
+          curl -o langs.svg "https://github-readme-stats.vercel.app/api/top-langs/?username=PriyanshuSingh44&layout=compact&theme=radical"
 
       - name: Commit stats
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add stats.svg
-          git commit -m "Update stats" || exit 0
+          git add stats.svg langs.svg
+          git commit -m "Update GitHub stats" || exit 0
           git push
