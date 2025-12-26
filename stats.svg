@@ -26,8 +26,4 @@
   <text x="30" y="170" fill="#569cd6" font-size="14">🌍 Contributed To:</text>
   <text x="200" y="170" fill="#ffffff" font-size="14">15</text>
 
-  <!-- Score Circle -->
-  <circle cx="520" cy="105" r="45" fill="none" stroke="#3fa9f5" stroke-width="6"/>
-  <text x="495" y="115" fill="#3fa9f5" font-size="24" font-weight="bold">A+</text>
-
 </svg>
