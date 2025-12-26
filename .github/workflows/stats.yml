@@ -11,7 +11,6 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +19,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq bc
 
-      - name: Fetch stats and generate SVGs
+      - name: Generate stats
         shell: bash
         run: |
           set -e
@@ -29,80 +28,60 @@ jobs:
           TOKEN="${{ secrets.GITHUB_TOKEN }}"
           ACCEPT="application/vnd.github.cloak-preview+json"
 
-          echo "Fetching repositories..."
           curl -s -H "Authorization: token $TOKEN" "https://api.github.com/users/$USER/repos?per_page=100" > repos.json
-
-          echo "Fetching PRs..."
           curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=author:$USER+type:pr" > prs.json
-
-          echo "Fetching Issues..."
           curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=author:$USER+type:issue" > issues.json
-
-          echo "Fetching commits..."
           curl -s -H "Authorization: token $TOKEN" -H "Accept: $ACCEPT" "https://api.github.com/search/commits?q=author:$USER" > commits.json
 
-          stars=$(jq '[.[].stargazers_count] | add // 0' repos.json)
-          prs=$(jq '.total_count // 0' prs.json)
-          issues=$(jq '.total_count // 0' issues.json)
-          commits=$(jq '.total_count // 0' commits.json)
-          contributed=$(jq '[.[] | select(.fork == false)] | length' repos.json)
+          STARS=$(jq '[.[].stargazers_count] | add // 0' repos.json)
+          PRS=$(jq '.total_count // 0' prs.json)
+          ISSUES=$(jq '.total_count // 0' issues.json)
+          COMMITS=$(jq '.total_count // 0' commits.json)
+          CONTRIBUTED=$(jq '[.[] | select(.fork == false)] | length' repos.json)
 
-          echo "Aggregating languages..."
-          jq -r '.[].languages_url' repos.json | while read url; do
+          jq -r '.[].languages_url' repos.json | while read -r url; do
             curl -s -H "Authorization: token $TOKEN" "$url"
           done | jq -s 'reduce .[] as $i ({}; reduce ($i | keys[]) as $k (. ; .[$k] += $i[$k]))' > langs.json || echo "{}" > langs.json
 
-          total_bytes=$(jq '[.[]] | add // 1' langs.json)
+          TOTAL=$(jq '[.[]] | add // 1' langs.json)
 
-          jq -r --arg total "$total_bytes" '
+          jq -r --arg total "$TOTAL" '
             to_entries | sort_by(-.value) | .[0:5] |
-            map("\(.key) \(.value*100/$total)") | .[]
+            .[] | "\(.key) \(.value*100/$total)"
           ' langs.json > langs.txt || true
 
-          echo "Generating stats.svg..."
-          cat > stats.svg <<EOF
-<svg xmlns="http://www.w3.org/2000/svg" width="520" height="210">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#141321"/>
-      <stop offset="100%" stop-color="#1f1b3a"/>
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" rx="14" ry="14" fill="url(#bg)"/>
-  <text x="20" y="35" fill="#c792ea" font-size="18" font-weight="bold">$USER's GitHub Stats</text>
-  <text x="20" y="70" fill="#89ddff">⭐ Total Stars: $stars</text>
-  <text x="20" y="95" fill="#82aaff">🧾 Commits: $commits</text>
-  <text x="20" y="120" fill="#c3e88d">🔀 PRs: $prs</text>
-  <text x="20" y="145" fill="#f78c6c">🐞 Issues: $issues</text>
-  <text x="20" y="170" fill="#ffcb6b">🌍 Contributed to: $contributed</text>
-</svg>
-EOF
+          echo "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='210'>
+          <rect width='100%' height='100%' rx='14' ry='14' fill='#141321'/>
+          <text x='20' y='35' fill='#c792ea' font-size='18'>$USER GitHub Stats</text>
+          <text x='20' y='70' fill='#89ddff'>Stars: $STARS</text>
+          <text x='20' y='95' fill='#82aaff'>Commits: $COMMITS</text>
+          <text x='20' y='120' fill='#c3e88d'>PRs: $PRS</text>
+          <text x='20' y='145' fill='#f78c6c'>Issues: $ISSUES</text>
+          <text x='20' y='170' fill='#ffcb6b'>Contributed: $CONTRIBUTED</text>
+          </svg>" > stats.svg
 
-          echo "Generating langs.svg..."
           y=50
-          bars=""
-          while read name val; do
+          BARS=""
+          while read -r name val; do
             width=$(printf "%.0f" "$(echo "$val*2.5" | bc)")
-            bars="$bars
-  <text x='20' y='$y' fill='#82aaff'>$name</text>
-  <rect x='140' y='$((y-12))' rx='6' ry='6' width='250' height='10' fill='#2d2b55'/>
-  <rect x='140' y='$((y-12))' rx='6' ry='6' width='$width' height='10' fill='#c792ea'/>
-  <text x='410' y='$y' fill='#c3e88d'>$(printf "%.1f" $val)%</text>"
+            BARS="$BARS
+          <text x='20' y='$y' fill='#82aaff'>$name</text>
+          <rect x='140' y='$((y-12))' rx='6' ry='6' width='250' height='10' fill='#2d2b55'/>
+          <rect x='140' y='$((y-12))' rx='6' ry='6' width='$width' height='10' fill='#c792ea'/>
+          <text x='410' y='$y' fill='#c3e88d'>$(printf "%.1f" "$val")%</text>"
             y=$((y+28))
           done < langs.txt
 
-          cat > langs.svg <<EOF
-<svg xmlns="http://www.w3.org/2000/svg" width="460" height="220">
-  <rect width="100%" height="100%" rx="14" ry="14" fill="#141321"/>
-  <text x="20" y="30" fill="#c792ea" font-size="18" font-weight="bold">Most Used Languages</text>
-  $bars
-</svg>
-EOF
+          echo "<svg xmlns='http://www.w3.org/2000/svg' width='460' height='220'>
+          <rect width='100%' height='100%' rx='14' ry='14' fill='#141321'/>
+          <text x='20' y='30' fill='#c792ea' font-size='18'>Most Used Languages</text>
+          $BARS
+          </svg>" > langs.svg
 
-      - name: Commit and push stats
+      - name: Commit results
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add stats.svg langs.svg
-          git commit -m "Update GitHub stats" || echo "No changes to commit"
+          git commit -m "Update GitHub stats" || echo "No changes"
           git push
