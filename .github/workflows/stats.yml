@@ -11,6 +11,7 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -50,33 +51,59 @@ jobs:
             .[] | "\(.key) \(.value*100/$total)"
           ' langs.json > langs.txt || true
 
-          echo "<svg xmlns='http://www.w3.org/2000/svg' width='520' height='210'>
-          <rect width='100%' height='100%' rx='14' ry='14' fill='#141321'/>
-          <text x='20' y='35' fill='#c792ea' font-size='18'>$USER GitHub Stats</text>
-          <text x='20' y='70' fill='#89ddff'>Stars: $STARS</text>
-          <text x='20' y='95' fill='#82aaff'>Commits: $COMMITS</text>
-          <text x='20' y='120' fill='#c3e88d'>PRs: $PRS</text>
-          <text x='20' y='145' fill='#f78c6c'>Issues: $ISSUES</text>
-          <text x='20' y='170' fill='#ffcb6b'>Contributed: $CONTRIBUTED</text>
-          </svg>" > stats.svg
+          cat > stats.svg <<EOF
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f2027"/>
+      <stop offset="50%" stop-color="#203a43"/>
+      <stop offset="100%" stop-color="#2c5364"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" rx="16" ry="16" fill="url(#bg)"/>
+
+  <text x="30" y="35" fill="#9cdcfe" font-size="20" font-weight="bold">$USER GitHub Stats</text>
+
+  <text x="30" y="70" fill="#c586c0" font-size="14">⭐ Total Stars:</text>
+  <text x="200" y="70" fill="#ffffff" font-size="14">$STARS</text>
+
+  <text x="30" y="95" fill="#4ec9b0" font-size="14">🧾 Total Commits:</text>
+  <text x="200" y="95" fill="#ffffff" font-size="14">$COMMITS</text>
+
+  <text x="30" y="120" fill="#dcdcaa" font-size="14">🔀 Total PRs:</text>
+  <text x="200" y="120" fill="#ffffff" font-size="14">$PRS</text>
+
+  <text x="30" y="145" fill="#ce9178" font-size="14">🐞 Total Issues:</text>
+  <text x="200" y="145" fill="#ffffff" font-size="14">$ISSUES</text>
+
+  <text x="30" y="170" fill="#569cd6" font-size="14">🌍 Contributed To:</text>
+  <text x="200" y="170" fill="#ffffff" font-size="14">$CONTRIBUTED</text>
+
+  <circle cx="520" cy="105" r="45" fill="none" stroke="#3fa9f5" stroke-width="6"/>
+  <text x="495" y="115" fill="#3fa9f5" font-size="24" font-weight="bold">A+</text>
+</svg>
+EOF
 
           y=50
           BARS=""
           while read -r name val; do
             width=$(printf "%.0f" "$(echo "$val*2.5" | bc)")
             BARS="$BARS
-          <text x='20' y='$y' fill='#82aaff'>$name</text>
-          <rect x='140' y='$((y-12))' rx='6' ry='6' width='250' height='10' fill='#2d2b55'/>
-          <rect x='140' y='$((y-12))' rx='6' ry='6' width='$width' height='10' fill='#c792ea'/>
-          <text x='410' y='$y' fill='#c3e88d'>$(printf "%.1f" "$val")%</text>"
+  <text x='20' y='$y' fill='#82aaff'>$name</text>
+  <rect x='140' y='$((y-12))' rx='6' ry='6' width='250' height='10' fill='#2d2b55'/>
+  <rect x='140' y='$((y-12))' rx='6' ry='6' width='$width' height='10' fill='#c792ea'/>
+  <text x='410' y='$y' fill='#c3e88d'>$(printf "%.1f" "$val")%</text>"
             y=$((y+28))
           done < langs.txt
 
-          echo "<svg xmlns='http://www.w3.org/2000/svg' width='460' height='220'>
-          <rect width='100%' height='100%' rx='14' ry='14' fill='#141321'/>
-          <text x='20' y='30' fill='#c792ea' font-size='18'>Most Used Languages</text>
-          $BARS
-          </svg>" > langs.svg
+          cat > langs.svg <<EOF
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="220">
+  <rect width="100%" height="100%" rx="14" ry="14" fill="#141321"/>
+  <text x="20" y="30" fill="#c792ea" font-size="18">Most Used Languages</text>
+$BARS
+</svg>
+EOF
 
       - name: Commit results
         run: |
