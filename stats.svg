@@ -1,9 +1,9 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='400' height='120'>
-<style>
-text { font: 14px sans-serif; fill: white; }
-</style>
-<rect width='100%' height='100%' rx='10' ry='10' fill='#141321'/>
-<text x='20' y='40'>Public Repos: 17</text>
-<text x='20' y='70'>Followers: 7</text>
-<text x='20' y='100'>Username: PriyanshuSingh44</text>
+<svg xmlns='http://www.w3.org/2000/svg' width='520' height='210'>
+<rect width='100%' height='100%' rx='14' ry='14' fill='#141321'/>
+<text x='20' y='35' fill='#c792ea' font-size='18'>PriyanshuSingh44 GitHub Stats</text>
+<text x='20' y='70' fill='#89ddff'>Stars: 3</text>
+<text x='20' y='95' fill='#82aaff'>Commits: 175</text>
+<text x='20' y='120' fill='#c3e88d'>PRs: 5</text>
+<text x='20' y='145' fill='#f78c6c'>Issues: 0</text>
+<text x='20' y='170' fill='#ffcb6b'>Contributed: 15</text>
 </svg>
