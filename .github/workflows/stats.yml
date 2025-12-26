@@ -1,0 +1,31 @@
+name: Generate GitHub Stats
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate stats
+        uses: anuraghazra/github-readme-stats@master
+        with:
+          username: PriyanshuSingh44
+          show_icons: true
+          theme: radical
+          output: stats.svg
+
+      - name: Commit stats
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add stats.svg
+          git commit -m "Update stats" || exit 0
+          git push
