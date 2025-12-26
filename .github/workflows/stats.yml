@@ -79,10 +79,6 @@ jobs:
             <text x="30" y="170" fill="#569cd6" font-size="14">🌍 Contributed To:</text>
             <text x="200" y="170" fill="#ffffff" font-size="14">$CONTRIBUTED</text>
           
-            <!-- Score Circle -->
-            <circle cx="520" cy="105" r="45" fill="none" stroke="#3fa9f5" stroke-width="6"/>
-            <text x="495" y="115" fill="#3fa9f5" font-size="24" font-weight="bold">A+</text>
-          
           </svg>
           EOF
 
@@ -99,11 +95,22 @@ jobs:
             y=$((y+28))
           done < langs.txt
 
-          echo "<svg xmlns='http://www.w3.org/2000/svg' width='460' height='220'>
-          <rect width='100%' height='100%' rx='14' ry='14' fill='#141321'/>
-          <text x='20' y='30' fill='#c792ea' font-size='18'>Most Used Languages</text>
+          cat > langs.svg <<EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="460" height="220">
+            <defs>
+              <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0f2027"/>
+                <stop offset="50%" stop-color="#203a43"/>
+                <stop offset="100%" stop-color="#2c5364"/>
+              </linearGradient>
+            </defs>
+          
+            <rect width="100%" height="100%" rx="14" ry="14" fill="url(#bg2)"/>
+            <text x="20" y="30" fill="#9cdcfe" font-size="18" font-weight="bold">Most Used Languages</text>
           $BARS
-          </svg>" > langs.svg
+          </svg>
+          EOF
+
 
       - name: Commit results
         run: |
