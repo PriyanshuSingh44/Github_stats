@@ -15,7 +15,7 @@
   <text x="200" y="70" fill="#ffffff" font-size="14">3</text>
 
   <text x="30" y="95" fill="#4ec9b0" font-size="14">🧾 Total Commits:</text>
-  <text x="200" y="95" fill="#ffffff" font-size="14">179</text>
+  <text x="200" y="95" fill="#ffffff" font-size="14">178</text>
 
   <text x="30" y="120" fill="#dcdcaa" font-size="14">🔀 Total PRs:</text>
   <text x="200" y="120" fill="#ffffff" font-size="14">5</text>
